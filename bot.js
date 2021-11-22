@@ -12,6 +12,8 @@ dayjs.locale('tr');
 const bot = new Telegraf(process.env.TELEGRAM_CHANNEL_ID);
 const menu = [];
 
+//TODO: Her gün kendisi menüyü mesaj atsın ?
+
 /*
 * menu.push({
   date: '21 Kasım',
@@ -61,32 +63,48 @@ async function setMenuOfMonth() {
 }
 
 async function getTodayMenu() {
-  const today = dayjs().format('D MMMM');
+  const today = convertDateFormat(dayjs());
 
   const todayMenu = menu.find(({ date }) => {
     return date === today;
   });
 
-  if (typeof todayMenu == 'undefined') {
-   return 'menü yok'
-  }
+  if (typeof todayMenu == 'undefined') return '😕 Haftasonu ve resmi tatillerde yemekhane kapalı olur.';
 
-  return test(todayMenu);
+  return convertToList(todayMenu);
 }
 
 async function getMenuOfWeek() {
+  const DAY_COUNT_OF_WEEK = 7;
+  const menusOfWeek = [];
+
+  let startDateOfWeek = dayjs().startOf('week');
+
+  //TODO: Rewrite
+  for (let i = 0; i > DAY_COUNT_OF_WEEK; i++) {
+    startDateOfWeek = startDateOfWeek.add(1, 'day');
+    console.log(i);
+  }
+
+  return convertDateFormat(startDateOfWeek);
+  return convertDateFormat();
 }
 
-function test(menu) {
+function convertToList(menu) {
   return `
 ⏰ ${menu.date}
 🍽 ${menu.foods.slice(',')}
 🎯 ${menu.totalCalorieText}`;
 }
 
+function convertDateFormat(date) {
+  return date.format('D MMMM');
+}
+
 async function startBot() {
   // TODO: günlük,haftalık menü
   // TODO: async function kaldırılabilir mi ?
+
   bot.start(async ctx => {
     ctx.reply('bilgilendirme');
   });
