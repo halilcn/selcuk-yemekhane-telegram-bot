@@ -63,31 +63,47 @@ async function setMenuOfMonth() {
 }
 
 async function getTodayMenu() {
-  const today = convertDateFormat(dayjs());
-
-  const todayMenu = menu.find(({ date }) => {
-    return date === today;
-  });
+  const todayMenu = getMenuByDate(dayjs());
 
   if (typeof todayMenu == 'undefined') return '😕 Haftasonu ve resmi tatillerde yemekhane kapalı olur.';
 
   return convertToList(todayMenu);
 }
 
+//TODO:!
+function getMenuByDate(date2) {
+  date2 = convertDateFormat(date2);
+
+  return menu.find(({ date }) => {
+    return date === date2;
+  });
+}
+
 async function getMenuOfWeek() {
   const DAY_COUNT_OF_WEEK = 7;
-  const menusOfWeek = [];
+  let menusOfWeek = [];
 
   let startDateOfWeek = dayjs().startOf('week');
 
   //TODO: Rewrite
-  for (let i = 0; i > DAY_COUNT_OF_WEEK; i++) {
+  for (let i = 1; i < DAY_COUNT_OF_WEEK; i++) {
+
+    //TODO:!
+    const menu = getMenuByDate(startDateOfWeek);
+    if (typeof menu != 'undefined') {
+      menusOfWeek.push(menu);
+    }
+
     startDateOfWeek = startDateOfWeek.add(1, 'day');
-    console.log(i);
   }
 
-  return convertDateFormat(startDateOfWeek);
-  return convertDateFormat();
+  //TODO:!
+  let test = '';
+  menusOfWeek.forEach(item => {
+    test += `${convertToList(item)}`;
+  });
+
+  return test;
 }
 
 function convertToList(menu) {
