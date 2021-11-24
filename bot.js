@@ -12,18 +12,10 @@ dayjs.locale('tr');
 const bot = new Telegraf(process.env.TELEGRAM_CHANNEL_ID);
 const menu = [];
 
-//TODO: Her gün kendisi menüyü mesaj atsın ?
-
-/*
-* menu.push({
-  date: '21 Kasım',
-  foods: ['adasdsad asd', 'asdasdadoa ksdkaod', 'afasdaps dl'],
-  totalCalorieText: '12121 Kalori'
-});
-*/
-
-const getMenuJob = new CronJob('0 5 * * * *', function () {
-  console.log('You will see this message every second');
+const getMenuJob = new CronJob('30 5 * * *', async () => {
+  console.log('Cron started...');
+  await setMenuOfMonth();
+  console.log('Cron finished...');
 });
 
 async function setMenuOfMonth() {
@@ -52,58 +44,53 @@ async function setMenuOfMonth() {
 
       menu.push({ ...menuData });
 
-      menuData.date = '';
-      menuData.foods = [];
-      menuData.totalCalorieText = '';
+      // Clear menu of day
+      menuData = {
+        date: '',
+        foods: [],
+        totalCalorieText: ''
+      };
     });
   });
 
-  console.log('Menu finished...');
+  console.log('Getting the menu from the page is finished...');
   console.log(`Total days of menu: ${menu.length}`);
 }
 
 async function getTodayMenu() {
-  const todayMenu = getMenuByDate(dayjs());
+  const todayMenu = await getMenuByDate(dayjs());
 
   if (typeof todayMenu == 'undefined') return '😕 Haftasonu ve resmi tatillerde yemekhane kapalı olur.';
 
   return convertToList(todayMenu);
 }
 
-//TODO:!
-function getMenuByDate(date2) {
-  date2 = convertDateFormat(date2);
-
-  return menu.find(({ date }) => {
-    return date === date2;
-  });
-}
-
 async function getMenuOfWeek() {
   const DAY_COUNT_OF_WEEK = 7;
-  let menusOfWeek = [];
-
+  const menuOfWeek = [];
+  let menu = null;
   let startDateOfWeek = dayjs().startOf('week');
 
-  //TODO: Rewrite
   for (let i = 1; i < DAY_COUNT_OF_WEEK; i++) {
-
-    //TODO:!
-    const menu = getMenuByDate(startDateOfWeek);
-    if (typeof menu != 'undefined') {
-      menusOfWeek.push(menu);
-    }
-
+    menu = await getMenuByDate(startDateOfWeek);
+    if (typeof menu != 'undefined') menuOfWeek.push(menu);
     startDateOfWeek = startDateOfWeek.add(1, 'day');
   }
 
-  //TODO:!
-  let test = '';
-  menusOfWeek.forEach(item => {
-    test += `${convertToList(item)}`;
+  let convertedList = '';
+  menuOfWeek.forEach(item => {
+    convertedList += convertToList(item);
   });
 
-  return test;
+  return convertedList;
+}
+
+async function getMenuByDate(menuDate) {
+  menuDate = convertDateFormat(menuDate);
+
+  return await menu.find(({ date }) => {
+    return date === menuDate;
+  });
 }
 
 function convertToList(menu) {
@@ -118,21 +105,20 @@ function convertDateFormat(date) {
 }
 
 async function startBot() {
-  // TODO: günlük,haftalık menü
-  // TODO: async function kaldırılabilir mi ?
-
   bot.start(async ctx => {
-    ctx.reply('bilgilendirme');
+    ctx.reply(`
+/bugun - Bugünün menüsünü getirir.
+/hafta - Haftanın menüsün getirir.
+/github - Proje kaynağını getirir.
+    `);
   });
 
   bot.command('bugun', async (ctx) => {
-    const menu = await getTodayMenu();
-    ctx.reply(menu);
+    ctx.reply(await getTodayMenu());
   });
 
-  bot.command('haftalik', async (ctx) => {
-    const menu = await getMenuOfWeek();
-    ctx.reply(menu);
+  bot.command('hafta', async (ctx) => {
+    ctx.reply(await getMenuOfWeek());
   });
 
   bot.launch();
