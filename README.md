@@ -5,6 +5,7 @@
 This bot helps you to know the dining hall menu of Selcuk University.
 
 Click below to access to the bot:
+
 [![@selcukyemekhanebot](https://img.shields.io/badge/%F0%9F%92%AC%20Telegram-%40selcukyemekhanebot-blue.svg)](https://telegram.me/selcukyemekhanebot)
 
 ## Commands
