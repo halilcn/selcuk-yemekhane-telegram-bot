@@ -11,6 +11,7 @@ dayjs.locale('tr');
 
 const bot = new Telegraf(process.env.TELEGRAM_CHANNEL_ID);
 const menu = [];
+let totalRequest = 0;
 
 const getMenuJob = new CronJob('30 5 * * *', async () => {
   console.log('Cron started...');
@@ -104,6 +105,13 @@ function convertDateFormat(date) {
   return date.format('D MMMM');
 }
 
+function requestCompleted(message) {
+  totalRequest++;
+
+  console.log(`Command: ${message.text} User: ${message.from.first_name}(${message.from.username})`);
+  console.log(`Total request: ${totalRequest}`);
+}
+
 async function startBot() {
   bot.start(async ctx => {
     ctx.reply(`
@@ -111,14 +119,22 @@ async function startBot() {
 /hafta - Haftanın menüsün getirir.
 /github - Proje kaynağını getirir.
     `);
+    requestCompleted(ctx.message);
   });
 
-  bot.command('bugun', async (ctx) => {
+  bot.command('bugun', async ctx => {
     ctx.reply(await getTodayMenu());
+    requestCompleted(ctx.message);
   });
 
-  bot.command('hafta', async (ctx) => {
+  bot.command('hafta', async ctx => {
     ctx.reply(await getMenuOfWeek());
+    requestCompleted(ctx.message);
+  });
+
+  bot.command('github', async ctx => {
+    ctx.reply('📁 https://github.com/halilcn/selcuk-yemekhane-telegram-bot');
+    requestCompleted(ctx.message);
   });
 
   bot.launch();
