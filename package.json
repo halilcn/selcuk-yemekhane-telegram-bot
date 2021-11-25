@@ -1,8 +1,8 @@
 {
   "name": "yemekhanebot",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Selçuk Üniversitesi Yemekhane Botu",
+  "main": "src/bot.js",
   "scripts": {
     "start": "node src/bot.js",
     "worker": "node src/bot.js",
